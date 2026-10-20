@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: axiom-backend
+    environment:
+    - ENVIRONMENT=development
+    - DEBUG=true
+    - DATABASE_URL=sqlite+aiosqlite:////app/data/axiom.db
+    - SECRET_KEY=dev-secret-change-in-production-min-32-chars
+    - CORS_ORIGINS=["http://localhost:5173","http://localhost:80"]
+    - MODELS_DIR=/app/models
+    volumes:
+    - axiom-data:/app/data
+    ports:
+    - 127.0.0.1:8000:8000
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health',
+        timeout=3)
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+    - axiom-network
+    restart: unless-stopped
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: axiom-frontend
+    ports:
+    - 127.0.0.1:80:80
+    depends_on:
+    - backend
+    networks:
+    - axiom-network
+    restart: unless-stopped
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: axiom-keycloak
+    command: start-dev
+    environment:
+    - KEYCLOAK_ADMIN=admin
+    - KEYCLOAK_ADMIN_PASSWORD=admin
+    - KC_DB=dev-file
+    - KC_HEALTH_ENABLED=true
+    ports:
+    - 127.0.0.1:8080:8080
+    volumes:
+    - keycloak-data:/opt/keycloak/data
+    healthcheck:
+      test:
+      - CMD
+      - bash
+      - -ec
+      - exec 3<>/dev/tcp/127.0.0.1/9000; printf 'GET /health/ready HTTP/1.0\r\n\r\n'
+        >&3; read -r status <&3; [[ "$$status" == *' 200 '* ]]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+    - axiom-network
+    restart: unless-stopped
+volumes:
+  axiom-data: null
+  keycloak-data: null
+networks:
+  axiom-network:
+    driver: bridge
