@@ -13,7 +13,7 @@ env:
 jobs:
   backend-test:
     name: Backend Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ./backend
@@ -35,15 +35,19 @@ jobs:
       - name: Run tests
         run: |
           .venv/bin/python -m pytest tests/ -v --cov=app --cov-report=term-missing
+        env:
+          PYTHONPATH: /home/runner/work/axiom-workbench-alan-vo/axiom-workbench-alan-vo/backend
 
       - name: Type check
         run: |
           .venv/bin/python -m pip install mypy==1.13.0
           .venv/bin/mypy app/
+        env:
+          PYTHONPATH: /home/runner/work/axiom-workbench-alan-vo/axiom-workbench-alan-vo/backend
 
   frontend-test:
     name: Frontend Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ./frontend
@@ -72,7 +76,7 @@ jobs:
 
   docker-build:
     name: Docker Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [backend-test, frontend-test]
     steps:
       - name: Checkout repository
@@ -101,7 +105,7 @@ jobs:
 
   compose-up:
     name: Compose Integration Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [docker-build]
     steps:
       - name: Checkout repository

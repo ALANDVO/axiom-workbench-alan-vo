@@ -2,7 +2,7 @@
 import os
 from functools import lru_cache
 from typing import Optional
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
 
@@ -46,11 +46,11 @@ class Settings(BaseSettings):
     MODELS_DIR: str = "/app/models"
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024 * 1024  # 50 GB
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
-
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
 
 @lru_cache
 def get_settings() -> Settings:

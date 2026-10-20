@@ -58,4 +58,4 @@ coverage/
 *.pt
 *.bin
 *.gguf
-models/
+/models/
