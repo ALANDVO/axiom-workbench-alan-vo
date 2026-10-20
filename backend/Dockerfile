@@ -2,9 +2,9 @@
 FROM python:3.12-slim AS base
 
 # Install system dependencies
-    gcc \
-    libpq-dev \
-    curl \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc libpq-dev curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash appuser
