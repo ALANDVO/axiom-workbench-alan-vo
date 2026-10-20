@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "name": "axiom-workbench-alan-vo",
+  "owner": "ALANDVO",
+  "email": "alanvo@gmail.com",
+  "domain": "AI/ML developer tools",
+  "summary": "Diffusion model workflow orchestration platform with model registry, graph editor, and local inference engine",
+  "workflows": [
+    "Register and version diffusion models with metadata and SHA256 verification",
+    "Compose visual node-graph workflows for diffusion pipelines",
+    "Execute local inference with VRAM-aware offloading and multiple samplers"
+  ],
+  "auth": "oidc-keycloak-saml-broker",
+  "llm_providers": [
+    "openai-compatible",
+    "anthropic",
+    "gemini",
+    "ollama"
+  ],
+  "version": "1.0.0"
+}

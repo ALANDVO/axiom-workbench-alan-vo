@@ -1,0 +1,61 @@
+# Gitignore for Axiom Workbench
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+.yarn/
+.pnp
+.pnp.js
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Local agent metadata (not product source)
+.antigravitycli/
+.omp/
+
+# Docker
+.docker/
+
+# Test artifacts
+coverage/
+.nyc_output/
+
+# Model files (large binary assets)
+*.safetensors
+*.ckpt
+*.pt
+*.bin
+*.gguf
+/models/
