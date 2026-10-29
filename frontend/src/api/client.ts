@@ -28,6 +28,8 @@ export interface PaginationParams {
   architecture?: ModelArchitectureSchema
   is_active?: boolean
   search?: string
+  sort_by?: string
+  sort_order?: 'asc' | 'desc'
 }
 
 export const modelsApi = {
