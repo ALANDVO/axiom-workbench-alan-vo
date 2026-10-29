@@ -4,7 +4,7 @@
   "owner": "ALANDVO",
   "email": "alanvo@gmail.com",
   "domain": "AI/ML developer tools",
-  "summary": "Diffusion model workflow orchestration platform with model registry, graph editor, and local inference engine",
+  "summary": "Work in progress: axiom-workbench-alan-vo",
   "workflows": [
     "Register and version diffusion models with metadata and SHA256 verification",
     "Compose visual node-graph workflows for diffusion pipelines",
@@ -17,5 +17,6 @@
     "gemini",
     "ollama"
   ],
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "status": "work-in-progress"
 }

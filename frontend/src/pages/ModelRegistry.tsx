@@ -22,6 +22,8 @@ export function ModelRegistry() {
     architecture: '',
     isActive: '',
     search: '',
+    sortBy: '',
+    sortOrder: 'desc' as 'asc' | 'desc',
   })
 
   // Modal states
@@ -45,6 +47,8 @@ export function ModelRegistry() {
         architecture: (filters.architecture || undefined) as ModelArchitectureSchema | undefined,
         is_active: filters.isActive === '' ? undefined : filters.isActive === 'true',
         search: filters.search || undefined,
+        sort_by: filters.sortBy || undefined,
+        sort_order: filters.sortOrder,
       }
       const response = await modelsApi.list(params)
       setModels(response.data.items)
@@ -186,6 +190,33 @@ export function ModelRegistry() {
               <option value="">All</option>
               <option value="true">Active</option>
               <option value="false">Inactive</option>
+            </select>
+          </div>
+          <div className="form-group" style={{ minWidth: '160px' }}>
+            <label htmlFor="filter-sort">Sort By</label>
+            <select
+              id="filter-sort"
+              value={filters.sortBy}
+              onChange={e => setFilters(prev => ({ ...prev, sortBy: e.target.value, page: 1 }))}
+            >
+              <option value="">Default (Newest)</option>
+              <option value="name">Name</option>
+              <option value="display_name">Display Name</option>
+              <option value="architecture">Architecture</option>
+              <option value="format">Format</option>
+              <option value="created_at">Created At</option>
+              <option value="updated_at">Updated At</option>
+            </select>
+          </div>
+          <div className="form-group" style={{ minWidth: '120px' }}>
+            <label htmlFor="filter-sort-order">Order</label>
+            <select
+              id="filter-sort-order"
+              value={filters.sortOrder}
+              onChange={e => setFilters(prev => ({ ...prev, sortOrder: e.target.value as 'asc' | 'desc', page: 1 }))}
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
             </select>
           </div>
         </div>

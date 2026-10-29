@@ -1,5 +1,5 @@
 """Model registry API endpoints."""
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, func, or_
@@ -99,6 +99,8 @@ async def list_models(
     architecture: Optional[ModelArchitectureSchema] = Query(None, description="Filter by architecture"),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     search: Optional[str] = Query(None, description="Search in name/display_name"),
+    sort_by: Optional[str] = Query(None, description="Field to sort by (name, display_name, architecture, format, created_at, updated_at)"),
+    sort_order: Optional[str] = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     session: AsyncSession = Depends(get_session),
 ) -> ModelListResponse:
     """List diffusion models with pagination and filtering."""
@@ -120,8 +122,22 @@ async def list_models(
     count_query = select(func.count()).select_from(query.subquery())
     total = await session.scalar(count_query) or 0
 
+    # Sorting
+    sort_fields: dict[str, Any] = {
+        "name": DiffusionModel.name,
+        "display_name": DiffusionModel.display_name,
+        "architecture": DiffusionModel.architecture,
+        "format": DiffusionModel.format,
+        "created_at": DiffusionModel.created_at,
+        "updated_at": DiffusionModel.updated_at,
+    }
+    sort_column = sort_fields.get(sort_by or "", DiffusionModel.created_at)
+    if sort_order == "asc":
+        query = query.order_by(sort_column.asc())
+    else:
+        query = query.order_by(sort_column.desc())
+
     # Pagination
-    query = query.order_by(DiffusionModel.created_at.desc())
     query = query.offset((page - 1) * page_size).limit(page_size)
 
     result = await session.execute(query)
