@@ -51,12 +51,28 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
     }
   }, [initialData])
 
+  const validateJson = (jsonString: string): string | null => {
+    if (!jsonString.trim()) {
+      return null
+    }
+    try {
+      JSON.parse(jsonString)
+      return null
+    } catch {
+      return 'Invalid JSON format'
+    }
+  }
+
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof FormData, string>> = {}
     if (!formData.name.trim()) newErrors.name = 'Name is required'
     else if (!/^[a-zA-Z0-9_-]+$/.test(formData.name)) newErrors.name = 'Name must be alphanumeric with underscores/hyphens'
     if (!formData.display_name.trim()) newErrors.display_name = 'Display name is required'
     if (formData.hash_sha256 && !/^[a-fA-F0-9]{64}$/.test(formData.hash_sha256)) newErrors.hash_sha256 = 'Must be 64 hex characters'
+    const jsonError = validateJson(formData.config_json)
+    if (jsonError) {
+      newErrors.config_json = jsonError
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -77,11 +93,12 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
     if (!validate()) return
     const isEditing = !!initialData
     let submitData: ModelCreate | ModelUpdate
+    const configJson = formData.config_json.trim()
     if (isEditing) {
       const { name: _name, ...updates } = formData
-      submitData = { ...updates, hash_sha256: updates.hash_sha256 || undefined }
+      submitData = { ...updates, hash_sha256: updates.hash_sha256 || undefined, config_json: configJson || undefined }
     } else {
-      submitData = { ...formData, hash_sha256: formData.hash_sha256 || undefined }
+      submitData = { ...formData, hash_sha256: formData.hash_sha256 || undefined, config_json: configJson || undefined }
     }
     await onSubmit(submitData)
   }
@@ -101,10 +118,9 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
           onChange={handleChange}
           placeholder="e.g., flux-dev"
           disabled={isEditing || isSubmitting}
-          aria-invalid={!!errors.name}
-          aria-describedby={errors.name ? 'name-error' : undefined}
         />
-        {errors.name && <p id="name-error" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.name}</p>}
+        {errors.name && <span className="error-message">{errors.name}</span>}
+        {!isEditing && <small className="help-text">Cannot be changed after creation</small>}
       </div>
 
       <div className="form-group">
@@ -117,10 +133,8 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
           onChange={handleChange}
           placeholder="e.g., FLUX.1 Dev"
           disabled={isSubmitting}
-          aria-invalid={!!errors.display_name}
-          aria-describedby={errors.display_name ? 'display-name-error' : undefined}
         />
-        {errors.display_name && <p id="display-name-error" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.display_name}</p>}
+        {errors.display_name && <span className="error-message">{errors.display_name}</span>}
       </div>
 
       <div className="form-group">
@@ -130,8 +144,8 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
           name="description"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Optional description"
           rows={3}
+          placeholder="Optional description"
           disabled={isSubmitting}
         />
       </div>
@@ -147,7 +161,9 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
             disabled={isSubmitting}
           >
             {Object.entries(ARCHITECTURE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+              <option key={value} value={value}>
+                {label}
+              </option>
             ))}
           </select>
         </div>
@@ -162,21 +178,23 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
             disabled={isSubmitting}
           >
             {Object.entries(FORMAT_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+              <option key={value} value={value}>
+                {label}
+              </option>
             ))}
           </select>
         </div>
       </div>
 
       <div className="form-group">
-        <label htmlFor="file_path">File Path</label>
+        <label htmlFor="file_path">File Path *</label>
         <input
           id="file_path"
           name="file_path"
           type="text"
           value={formData.file_path}
           onChange={handleChange}
-          placeholder="/models/flux-dev.safetensors"
+          placeholder="/path/to/model.safetensors"
           disabled={isSubmitting}
         />
       </div>
@@ -190,26 +208,26 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
             type="number"
             value={formData.file_size ?? ''}
             onChange={handleChange}
-            placeholder="1234567890"
             min="0"
+            placeholder="Optional"
             disabled={isSubmitting}
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="hash_sha256">SHA256 Hash</label>
+          <label htmlFor="hash_sha256">SHA256 Hash *</label>
           <input
             id="hash_sha256"
             name="hash_sha256"
             type="text"
             value={formData.hash_sha256}
             onChange={handleChange}
-            placeholder="64 character hex string"
+            placeholder="64-character hex string"
+            maxLength={64}
             disabled={isSubmitting}
-            aria-invalid={!!errors.hash_sha256}
-            aria-describedby={errors.hash_sha256 ? 'hash-error' : undefined}
           />
-          {errors.hash_sha256 && <p id="hash-error" style={{ color: 'var(--color-danger)', fontSize: '12px', marginTop: '4px' }}>{errors.hash_sha256}</p>}
+          {errors.hash_sha256 && <span className="error-message">{errors.hash_sha256}</span>}
+          <small className="help-text">File integrity verification hash</small>
         </div>
       </div>
 
@@ -220,26 +238,21 @@ export function ModelForm({ initialData, onSubmit, onCancel, isSubmitting }: Mod
           name="config_json"
           value={formData.config_json}
           onChange={handleChange}
+          rows={6}
           placeholder='{"key": "value"}'
-          rows={4}
-          style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}
+          style={{ fontFamily: 'monospace', fontSize: '13px' }}
           disabled={isSubmitting}
         />
+        {errors.config_json && <span className="error-message">{errors.config_json}</span>}
+        <small className="help-text">Optional model configuration as valid JSON</small>
       </div>
 
-      <div className="modal-footer" style={{ marginTop: '24px', padding: '16px 0', borderTop: '1px solid var(--color-border)', background: 'transparent', borderRadius: 0 }}>
-        <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={isSubmitting}>
+      <div className="form-actions">
+        <button type="button" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </button>
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <span className="spinner" style={{ width: '16px', height: '16px' }} />
-              Saving...
-            </>
-          ) : (
-            submitLabel
-          )}
+        <button type="submit" disabled={isSubmitting} className="primary">
+          {isSubmitting ? 'Saving...' : submitLabel}
         </button>
       </div>
     </form>
