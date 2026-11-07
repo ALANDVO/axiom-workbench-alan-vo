@@ -66,3 +66,6 @@ Acceptance:
 - Gemini generateContent adapter
 - Ollama adapter
 
+---
+
+Alan Vo · [alanvo.net](https://alanvo.net)

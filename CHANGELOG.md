@@ -36,3 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workflow graph editor not yet implemented (planned for workflow-graph feature)
 - Inference engine not yet implemented (planned for inference-engine feature)
 - LLM adapters not yet implemented (planned for llm-adapters feature)
+
+---
+
+Alan Vo · [alanvo.net](https://alanvo.net)
