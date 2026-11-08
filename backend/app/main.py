@@ -1,5 +1,6 @@
 """Main FastAPI application."""
 from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,7 +10,7 @@ from app.api import models
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan manager."""
     await init_db()
     yield
@@ -41,7 +42,7 @@ app.include_router(models.router)
 
 
 @app.get("/health", tags=["health"])
-async def health_check():
+async def health_check() -> dict[str, str]:
     """Health check endpoint."""
     return {
         "status": "healthy",
@@ -51,7 +52,7 @@ async def health_check():
 
 
 @app.get("/", tags=["root"])
-async def root():
+async def root() -> dict[str, str]:
     """Root endpoint."""
     return {
         "name": settings.APP_NAME,
