@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.database import init_db, close_db
 from app.api import models
+from app.api import graphs
 
 
 @asynccontextmanager
@@ -39,6 +40,7 @@ app.add_middleware(
 
 # Routers
 app.include_router(models.router)
+app.include_router(graphs.router)
 
 
 @app.get("/health", tags=["health"])
