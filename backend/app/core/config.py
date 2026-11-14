@@ -1,5 +1,6 @@
 """Application configuration."""
 import os
+from app._version import APP_VERSION as RELEASE_VERSION
 from functools import lru_cache
 from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -11,7 +12,7 @@ class Settings(BaseSettings):
 
     # App
     APP_NAME: str = "axiom-workbench"
-    APP_VERSION: str = "1.0.0"
+    APP_VERSION: str = RELEASE_VERSION
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
