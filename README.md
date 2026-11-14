@@ -3,7 +3,7 @@
 > Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
 
 
-Current version: `1.0.0`.
+Current version: `1.4.1`.
 
 **Axiom Workbench** — Alan Vo | AI & Machine Learning
 

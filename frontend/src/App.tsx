@@ -1,3 +1,4 @@
+import { APP_VERSION } from './version'
 import { useEffect, useState } from 'react'
 import { healthApi } from '@/api/client'
 import { ModelRegistry } from '@/pages/ModelRegistry'
@@ -71,7 +72,7 @@ function App() {
         marginTop: 'auto',
       }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--color-text-secondary)', fontSize: '13px' }}>
-          <span>Axiom Workbench v1.0.0 — Alan Vo | AI & Machine Learning</span>
+          <span>Axiom Workbench v{APP_VERSION} — Alan Vo | AI & Machine Learning</span>
           <a href="https://github.com/ALANDVO/axiom-workbench-alan-vo" target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
       </footer>

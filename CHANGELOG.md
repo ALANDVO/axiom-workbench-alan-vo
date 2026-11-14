@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1 — version display correction
+
+Synchronize README, package metadata, API version, and UI footer with the published checkpoint version. Application QA remains unfinished as documented in STATUS.md.
+
 ## 1.4.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.

@@ -1,6 +1,6 @@
 [project]
 name = "axiom-workbench"
-version = "1.0.0"
+version = "1.4.1"
 description = "Axiom Workbench - Diffusion Model Workbench"
 readme = "README.md"
 license = {text = "MIT"}
