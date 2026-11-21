@@ -1,14 +1,13 @@
 """API schemas for model registry."""
 from datetime import datetime
-from typing import Optional
-from uuid import UUID
-from pydantic import BaseModel, Field, HttpUrl, ConfigDict
-from enum import Enum
-
-from app.models.model import ModelArchitecture, ModelFormat
+import uuid
+from typing import Optional, List, Any, Union
+from enum import Enum as PyEnum
+from pydantic import BaseModel, Field, ConfigDict
 
 
-class ModelArchitectureSchema(str, Enum):
+class ModelArchitecture(PyEnum):
+    """Supported diffusion model architectures."""
     SDXL = "sdxl"
     FLUX = "flux"
     SD15 = "sd15"
@@ -19,7 +18,27 @@ class ModelArchitectureSchema(str, Enum):
     OTHER = "other"
 
 
-class ModelFormatSchema(str, Enum):
+class ModelFormat(PyEnum):
+    """Model file formats."""
+    SAFETENSORS = "safetensors"
+    CKPT = "ckpt"
+    PT = "pt"
+    BIN = "bin"
+    GGUF = "gguf"
+
+
+class ModelArchitectureSchema(str, PyEnum):
+    SDXL = "sdxl"
+    FLUX = "flux"
+    SD15 = "sd15"
+    SD3 = "sd3"
+    HUNYUAN = "hunyuan"
+    LTX = "ltx"
+    WAN = "wan"
+    OTHER = "other"
+
+
+class ModelFormatSchema(str, PyEnum):
     SAFETENSORS = "safetensors"
     CKPT = "ckpt"
     PT = "pt"
@@ -29,63 +48,44 @@ class ModelFormatSchema(str, Enum):
 
 class ModelBase(BaseModel):
     """Base model schema."""
-    name: str = Field(..., min_length=1, max_length=255, pattern=r"^[a-zA-Z0-9_-]+$")
-    display_name: str = Field(..., min_length=1, max_length=255)
+    name: str
+    display_name: str
     description: Optional[str] = None
-    architecture: ModelArchitectureSchema = ModelArchitectureSchema.OTHER
+    architecture: ModelArchitectureSchema
     format: ModelFormatSchema = ModelFormatSchema.SAFETENSORS
 
 
 class ModelCreate(ModelBase):
     """Schema for creating a model."""
-    file_path: Optional[str] = None
-    file_size: Optional[int] = Field(None, ge=0)
-    hash_sha256: Optional[str] = Field(None, pattern=r"^[a-fA-F0-9]{64}$")
     config_json: Optional[str] = None
 
 
 class ModelUpdate(BaseModel):
     """Schema for updating a model."""
-    display_name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
-    architecture: Optional[ModelArchitectureSchema] = None
-    format: Optional[ModelFormatSchema] = None
-    file_path: Optional[str] = None
-    file_size: Optional[int] = Field(None, ge=0)
-    hash_sha256: Optional[str] = Field(None, pattern=r"^[a-fA-F0-9]{64}$")
-    config_json: Optional[str] = None
     is_active: Optional[bool] = None
 
 
-class ModelResponse(ModelBase):
+class ModelResponse(BaseModel):
     """Schema for model response."""
-    id: UUID
-    file_path: Optional[str] = None
-    file_size: Optional[int] = None
-    hash_sha256: Optional[str] = None
-    config_json: Optional[str] = None
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime
-    model_config = ConfigDict(from_attributes=True)
+    name: str
+    display_name: str
+    description: Optional[str] = None
+    architecture: ModelArchitectureSchema
+    format: ModelFormatSchema = ModelFormatSchema.SAFETENSORS
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
 
 class ModelListResponse(BaseModel):
     """Paginated model list response."""
-    items: list[ModelResponse]
-    total: int
-    page: int
-    page_size: int
-    total_pages: int
+    models: List[ModelResponse] = Field(default_factory=list)
+    total: int = 0
+    page: int = 1
+    page_size: int = 20
+    total_pages: int = 0
 
 
 class ModelVersionBase(BaseModel):
     """Base model version schema."""
-    version: str = Field(..., min_length=1, max_length=100)
-    file_path: str = Field(..., min_length=1, max_length=1024)
-    file_size: int = Field(..., ge=0)
-    hash_sha256: str = Field(..., pattern=r"^[a-fA-F0-9]{64}$")
-    changelog: Optional[str] = None
     is_default: bool = False
 
 
@@ -94,12 +94,9 @@ class ModelVersionCreate(ModelVersionBase):
     pass
 
 
-class ModelVersionResponse(ModelVersionBase):
+class ModelVersionResponse(BaseModel):
     """Schema for model version response."""
-    id: UUID
-    model_id: UUID
-    created_at: datetime
-
+    is_default: bool = False
     model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
 
@@ -108,3 +105,72 @@ class HealthResponse(BaseModel):
     status: str
     version: str
     environment: str
+
+
+"""Graph workflow schemas."""
+
+from enum import Enum
+from typing import Optional, List, Any
+from pydantic import BaseModel, Field
+
+
+class GraphNodeType(str, Enum):
+    """Types of graph nodes for workflow editing."""
+    MODEL = "model"
+    SAMPLER = "sampler"
+    SCHEDULER = "scheduler"
+    SAVER = "saver"
+    UTILITY = "utility"
+
+
+class GraphEdgeType(str, Enum):
+    """Types of edges connecting graph nodes."""
+    NEXT = "next"
+    CONDITIONAL = "conditional"
+    DATA = "data"
+
+
+class GraphNode(BaseModel):
+    """A node in the workflow graph."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique node identifier")
+    type: GraphNodeType = Field(description="Node type/Category")
+    position: dict = Field(default_factory=dict, description="Canvas position {x, y}")
+    data: dict = Field(default_factory=dict, description="Node-specific data/props")
+    model_id: Optional[str] = Field(default=None, description="Associated diffusion model ID")
+
+
+class GraphEdge(BaseModel):
+    """An edge connecting two graph nodes."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Unique edge identifier")
+    source: str = Field(description="Source node ID")
+    target: str = Field(description="Target node ID")
+    type: GraphEdgeType = Field(default=GraphEdgeType.NEXT, description="Edge relationship type")
+    data: dict = Field(default_factory=dict, description="Edge-specific data")
+
+
+class GraphWorkflow(BaseModel):
+    """A complete workflow graph with nodes and edges."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), description="Workflow unique identifier")
+    name: str = Field(default="Untitled Workflow", description="Human-readable workflow name")
+    description: Optional[str] = Field(default=None, description="Workflow description")
+    nodes: List[GraphNode] = Field(default_factory=list, description="Graph nodes")
+    edges: List[GraphEdge] = Field(default_factory=list, description="Graph edges")
+    node_ids: List[str] = Field(default_factory=list, description="Referenced model IDs")
+    created_at: Any = Field(default_factory=lambda: __import__("datetime").datetime.utcnow(), description="Creation timestamp")
+    updated_at: Any = Field(default_factory=lambda: __import__("datetime").datetime.utcnow(), description="Last update timestamp")
+
+
+class GraphNodeCreate(BaseModel):
+    """Schema for creating a graph node."""
+    type: GraphNodeType
+    position: Optional[dict] = Field(default=None, description="Canvas position {x, y}")
+    data: Optional[dict] = Field(default=None, description="Node-specific data/props")
+    model_id: Optional[str] = Field(default=None, description="Associated diffusion model ID")
+
+
+class GraphEdgeCreate(BaseModel):
+    """Schema for creating a graph edge."""
+    source: str = Field(description="Source node ID")
+    target: str = Field(description="Target node ID")
+    type: GraphEdgeType = Field(default=GraphEdgeType.NEXT, description="Edge relationship type")
+    data: Optional[dict] = Field(default=None, description="Edge-specific data")
