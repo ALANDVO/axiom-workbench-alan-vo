@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "current_feature": "workflow-graph",
+  "features": [
+    {
+      "id": "core-skeleton",
+      "title": "FastAPI/React skeleton with model registry workflow",
+      "status": "done",
+      "acceptance": [],
+      "implementation": [],
+      "tests": []
+    },
+    {
+      "id": "workflow-graph",
+      "title": "Graph/nodes workflow editor",
+      "status": "in_progress",
+      "acceptance": [
+        "Canvas with draggable nodes",
+        "Nodes connect via edges",
+        "Workflow serializes to JSON",
+        "Backend validates and executes workflow DAG"
+      ],
+      "implementation": [
+        "backend/app/api/graphs.py - CRUD routes",
+        "backend/app/api/schemas.py - GraphNode, GraphEdge, GraphWorkflow schemas",
+        "frontend/src/components/graph/GraphCanvas.tsx - React canvas component"
+      ],
+      "tests": [
+        "backend/tests/test_graphs.py - Graph API endpoint tests"
+      ]
+    },
+    {
+      "id": "inference-engine",
+      "title": "Local diffusion inference engine",
+      "status": "planned",
+      "acceptance": [],
+      "implementation": [],
+      "tests": []
+    },
+    {
+      "id": "auth-oidc",
+      "title": "OIDC/Keycloak authentication",
+      "status": "planned",
+      "acceptance": [],
+      "implementation": [],
+      "tests": []
+    },
+    {
+      "id": "llm-adapters",
+      "title": "LLM provider adapters",
+      "status": "planned",
+      "acceptance": [],
+      "implementation": [],
+      "tests": []
+    }
+  ]
+}
