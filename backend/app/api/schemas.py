@@ -58,26 +58,41 @@ class ModelBase(BaseModel):
 class ModelCreate(ModelBase):
     """Schema for creating a model."""
     config_json: Optional[str] = None
+    file_path: Optional[str] = None
+    file_size: Optional[int] = None
+    hash_sha256: Optional[str] = None
 
 
 class ModelUpdate(BaseModel):
     """Schema for updating a model."""
     is_active: Optional[bool] = None
+    display_name: Optional[str] = None
+    description: Optional[str] = None
+    architecture: Optional[ModelArchitectureSchema] = None
+    format: Optional[ModelFormatSchema] = None
 
 
 class ModelResponse(BaseModel):
     """Schema for model response."""
+    id: uuid.UUID
     name: str
     display_name: str
     description: Optional[str] = None
     architecture: ModelArchitectureSchema
     format: ModelFormatSchema = ModelFormatSchema.SAFETENSORS
+    file_path: Optional[str] = None
+    file_size: Optional[int] = None
+    hash_sha256: Optional[str] = None
+    config_json: Optional[str] = None
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
     model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
 
 class ModelListResponse(BaseModel):
     """Paginated model list response."""
-    models: List[ModelResponse] = Field(default_factory=list)
+    items: List[ModelResponse] = Field(default_factory=list)
     total: int = 0
     page: int = 1
     page_size: int = 20
@@ -91,12 +106,24 @@ class ModelVersionBase(BaseModel):
 
 class ModelVersionCreate(ModelVersionBase):
     """Schema for creating a model version."""
-    pass
+    version: str
+    file_path: Optional[str] = None
+    file_size: Optional[int] = None
+    hash_sha256: Optional[str] = None
+    changelog: Optional[str] = None
 
 
 class ModelVersionResponse(BaseModel):
     """Schema for model version response."""
+    id: uuid.UUID
+    model_id: uuid.UUID
+    version: str
+    file_path: Optional[str] = None
+    file_size: Optional[int] = None
+    hash_sha256: Optional[str] = None
+    changelog: Optional[str] = None
     is_default: bool = False
+    created_at: datetime = Field(default_factory=datetime.now)
     model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
 
