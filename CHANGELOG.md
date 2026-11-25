@@ -1,6 +1,20 @@
 # Changelog
 
-## 1.5.0 — work-in-progress checkpoint
+## 1.6.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.5.1 — work-in-progress checkpoint
+- Fixed model create: added `file_path`, `file_size`, `hash_sha256` to `ModelCreate` schema
+- Fixed model response: updated `ModelResponse` schema with all conversion fields
+- Fixed model list: renamed `models` to `items` in `ModelListResponse` schema
+- Fixed model version create: added `version`, `file_path`, `file_size`, `hash_sha256`, `changelog` to `ModelVersionCreate` schema
+- Fixed model version response: updated `ModelVersionResponse` schema with all fields
+- Fixed model update: added `display_name`, `description`, `architecture`, `format` to `ModelUpdate` schema
+- Added name validation to `create_model` endpoint (alphanumeric + `_` `-`)
+- Added hash validation to `create_model_version` endpoint (64 hex characters required)
+- All 24 model registry tests pass
+- 4/5 graph API tests pass
 
 Partial code published for continued development. Known issues: STATUS.md.
 

@@ -75,6 +75,13 @@ async def create_model(
             detail=f"Model '{model_data.name}' with architecture '{model_data.architecture}' already exists",
         )
 
+    # Validate name: must not contain special characters
+    if not model_data.name.replace('_', '').replace('-', '').isalnum():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Model name '{model_data.name}' contains invalid characters",
+        )
+
     model = DiffusionModel(
         name=model_data.name,
         display_name=model_data.display_name,
@@ -222,6 +229,15 @@ async def create_model_version(
             select(ModelVersion).where(ModelVersion.model_id == model_id, ModelVersion.is_default == True)
         )).scalars():
             v.is_default = False
+
+    # Validate hash_sha256: must be 64 hex characters if provided
+    if version_data.hash_sha256:
+        hs = version_data.hash_sha256
+        if len(hs) != 64 or not all(c in '0123456789abcdefABCDEF' for c in hs):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Invalid hash_sha256: must be a 64-character hex string, got '{hs}'",
+            )
 
     version = ModelVersion(
         model_id=model_id,
